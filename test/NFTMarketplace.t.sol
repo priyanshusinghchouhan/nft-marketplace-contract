@@ -88,4 +88,47 @@ contract NFTMarketplaceTest is Test {
 
         vm.stopPrank();
     }
+
+    function testListNftRevertsIfNotOwner() public {
+        vm.startPrank(otherUser);
+        nft.setApprovalForAll(address(marketplace), true);
+
+        vm.expectRevert("Not the NFT Owner");
+        marketplace.listNft(address(nft), tokenId, PRICE);
+
+        vm.stopPrank();
+    }
+
+    function testListNftRevertsIfNotApproved() public {
+        vm.startPrank(seller);
+
+        vm.expectRevert("Marketplace not approved");
+        marketplace.listNft(address(nft), tokenId, PRICE);
+
+        vm.stopPrank();
+    }
+
+    function testListNftRevertsIfAlreadyListed() public {
+        vm.startPrank(seller);
+        nft.setApprovalForAll(address(marketplace), true);
+        
+        marketplace.listNft(address(nft), tokenId, PRICE);
+
+        vm.expectRevert("NFT already listed");
+        marketplace.listNft(address(nft), tokenId, PRICE);
+
+        vm.stopPrank();
+    }
+
+    function testListNftIncreasesListingCounter() public {
+        vm.startPrank(seller);
+        nft.setApprovalForAll(address(marketplace), true);
+    
+        assertEq(marketplace.getTotalListings(), 0);
+
+        marketplace.listNft(address(nft), tokenId, PRICE);
+        assertEq(marketplace.getTotalListings(), 1);
+
+        vm.stopPrank();
+    }
 }
