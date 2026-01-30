@@ -285,7 +285,7 @@ contract NFTMarketplaceTest is Test {
         marketplace.cancelListing(listingId);  
 
         uint256 newListingId = marketplace.listNft(address(nft), tokenId, PRICE * 2);
-        
+
         (address newSeller, , , uint256 newPrice , bool active) = marketplace.getListing(newListingId);
 
         assertTrue(active);
@@ -295,6 +295,62 @@ contract NFTMarketplaceTest is Test {
         vm.stopPrank(); 
     }
 
+    /* ========================== UPDATE PRICE TESTS ========================== */
 
+    function testUpdatePriceSuccess() public {
+        vm.startPrank(seller);
+        nft.setApprovalForAll(address(marketplace), true);
+        uint256 listingId = marketplace.listNft(address(nft), tokenId, PRICE);
+
+        marketplace.updateListingPrice(listingId, PRICE * 2);
+
+        ( , , ,uint256 newPrice , bool active) = marketplace.getListing(listingId);
+
+        assertTrue(active);
+        assertEq(newPrice, PRICE * 2);
+
+        vm.stopPrank();
+    }
+
+    function testUpdatePriceEmitsEvent() public {
+        vm.startPrank(seller);
+        nft.setApprovalForAll(address(marketplace), true);
+        uint256 listingId = marketplace.listNft(address(nft), tokenId, PRICE);
+
+        uint256 newPrice = 2 ether;
+
+        vm.expectEmit(true, true, true, true);
+        emit NFTMarketplace.ListingPriceUpdated(listingId, newPrice);
+
+        marketplace.updateListingPrice(listingId, newPrice);
+
+        vm.stopPrank();
+    }
+
+    function testUpdatePriceRevertsIfNotSeller() public {
+        vm.startPrank(seller);
+        nft.setApprovalForAll(address(marketplace), true);
+        uint256 listingId = marketplace.listNft(address(nft), tokenId, PRICE);
+        vm.stopPrank();
+
+        uint256 newPrice = 2 ether;
+
+        vm.prank(otherUser);
+        vm.expectRevert("Not the seller");
+        marketplace.updateListingPrice(listingId, newPrice);
+    }
+
+    function testUpdatePriceRevertsIfListingNotActive() public {
+        vm.startPrank(seller);
+        nft.setApprovalForAll(address(marketplace), true);
+        uint256 listingId = marketplace.listNft(address(nft), tokenId, PRICE);
+
+        marketplace.cancelListing(listingId);
+
+        vm.expectRevert("Listing not active");
+        marketplace.updateListingPrice(listingId, PRICE * 2);
+
+        vm.stopPrank();
+    }
 
 }
