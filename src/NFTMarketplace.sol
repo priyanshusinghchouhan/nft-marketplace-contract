@@ -4,6 +4,11 @@ pragma solidity ^0.8.20;
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
+/**
+ * @title NFTMarketplace
+ * @dev NFT Marketplace for listing, buying and cancelling NFT sales
+ */
+
 contract NFTMarketplace is ReentrancyGuard {
     struct Listing {
         address seller;
@@ -72,4 +77,29 @@ contract NFTMarketplace is ReentrancyGuard {
     }
 
 
+    /**
+     * @dev Buy an NFT from a listing
+     * @param listingId ID of the listing
+     */
+
+    function buyNFT(uint256 listingId) external payable nonReentrant {
+        Listing storage listing = listings[listingId];
+
+        require(listing.active, "Listing not active");
+        require(msg.value == listing.price, "Incorrect Price");
+        require(msg.sender != listing.seller, "Cannot buy your own NFT");
+
+        listing.active = false;
+
+        IERC721(listing.nftContract).safeTransferFrom(
+            listing.seller,
+            msg.sender,
+            listing.tokenId
+        );
+
+        (bool success, ) = payable(listing.seller).call{value: msg.value}("");
+        require(success, "Payment transfer failed");
+
+        emit NFTSold(listingId, msg.sender, listing.seller, msg.value);
+    }
 }
