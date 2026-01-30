@@ -199,4 +199,27 @@ contract NFTMarketplaceTest is Test {
         vm.expectRevert("Cannot buy your own NFT");
         marketplace.buyNft{value: PRICE}(listingId);
     }
+
+    function testBuyNftAllowRelistingAfterPurchase() public {
+        vm.startPrank(seller);
+        nft.setApprovalForAll(address(marketplace), true);
+
+        uint256 listingId = marketplace.listNft(address(nft), tokenId, PRICE);
+        vm.stopPrank();
+
+        vm.prank(buyer);
+        marketplace.buyNft{value: PRICE}(listingId);
+
+        vm.startPrank(buyer);
+        nft.setApprovalForAll(address(marketplace), true);
+        uint256 newlistingId = marketplace.listNft(address(nft), tokenId, PRICE * 2);
+
+
+        (address newSeller, , , uint256 newPrice , bool active) = marketplace.getListing(newlistingId);
+        assertEq(newSeller, buyer);
+        assertEq(newPrice, PRICE * 2);
+        assertTrue(active);
+
+        vm.stopPrank();
+    }
 }
