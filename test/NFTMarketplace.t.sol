@@ -364,4 +364,64 @@ contract NFTMarketplaceTest is Test {
         vm.stopPrank();
     }
 
+    /* ========================== EDGE CASE TESTS ========================== */
+
+    function testMultipleListingsIndependent() public {
+        vm.startPrank(seller);
+        uint256 tokenId1 = nft.mint(seller);
+        uint256 tokenId2 = nft.mint(seller);
+
+        nft.setApprovalForAll(address(marketplace), true);
+
+        uint256 listingId1 = marketplace.listNft(address(nft), tokenId1, 1 ether);
+        uint256 listingId2 = marketplace.listNft(address(nft), tokenId2, 2 ether);
+
+        marketplace.cancelListing(listingId1);
+
+        ( , , , , bool active) = marketplace.getListing(listingId2);
+        assertTrue(active);
+
+        vm.stopPrank();
+    }
+
+    function testBuyerCanBuyMultipleNfts() public {
+        vm.startPrank(seller);
+        uint256 tokenId1 = nft.mint(seller);
+        uint256 tokenId2 = nft.mint(seller);
+
+        nft.setApprovalForAll(address(marketplace), true);
+
+        uint256 listingId1 = marketplace.listNft(address(nft), tokenId1, 1 ether);
+        uint256 listingId2 = marketplace.listNft(address(nft), tokenId2, 2 ether);
+        vm.stopPrank();
+
+        vm.startPrank(buyer);
+        marketplace.buyNft{value: 1 ether}(listingId1);
+        marketplace.buyNft{value: 2 ether}(listingId2);
+
+        assertEq(nft.ownerOf(tokenId1), buyer);
+        assertEq(nft.ownerOf(tokenId2), buyer);
+
+        vm.stopPrank();
+    }
+
+    function testGetTotalListingReturnsCorrectCount() public {
+        assertEq(marketplace.getTotalListings(), 0);
+
+        vm.startPrank(seller);
+        uint256 tokenId1 = nft.mint(seller);
+        uint256 tokenId2 = nft.mint(seller);
+
+        nft.setApprovalForAll(address(marketplace), true);
+
+        marketplace.listNft(address(nft), tokenId1, 1 ether);
+        assertEq(marketplace.getTotalListings(), 1);
+
+        marketplace.listNft(address(nft), tokenId2, 2 ether);
+        assertEq(marketplace.getTotalListings(), 2);
+        
+
+        vm.stopPrank();
+    }
+
 }
