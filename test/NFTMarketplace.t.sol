@@ -24,10 +24,12 @@ contract NFTMarketplaceTest is Test {
         tokenId = nft.mint(seller);
 
         vm.deal(buyer, 10 ether);
+        vm.deal(seller, 10 ether);
         vm.deal(otherUser, 10 ether);
     }
 
-    /* ============ LIST NFT TESTS ============ */
+    /* ========================== LIST NFT TESTS ========================== */
+
     function testListNft() public {
         vm.startPrank(seller);
 
@@ -130,5 +132,71 @@ contract NFTMarketplaceTest is Test {
         assertEq(marketplace.getTotalListings(), 1);
 
         vm.stopPrank();
+    }
+
+
+    /* ========================== BUY NFT TESTS ========================== */
+
+    function testBuyNftSuccess() public {
+        vm.startPrank(seller);
+        nft.setApprovalForAll(address(marketplace), true);
+
+        uint256 listingId = marketplace.listNft(address(nft), tokenId, PRICE);
+        vm.stopPrank();
+
+        uint256 sellerBalanceBefore = seller.balance;
+        uint256 buyerBalanceBefore = buyer.balance;
+
+        vm.prank(buyer);
+        marketplace.buyNft{value: PRICE}(listingId);
+
+        assertEq(nft.ownerOf(tokenId), buyer);
+
+        assertEq(seller.balance, sellerBalanceBefore + PRICE);
+        assertEq(buyer.balance, buyerBalanceBefore - PRICE);
+
+        ( , , , , bool active) = marketplace.getListing(listingId);
+        assertFalse(active);
+    }
+
+    function testBuyNftEmitsEvent() public {
+        vm.startPrank(seller);
+        nft.setApprovalForAll(address(marketplace), true);
+        uint256 listingId = marketplace.listNft(address(nft), tokenId, PRICE);
+        vm.stopPrank();
+
+        vm.expectEmit(true, true, true, true);
+        emit NFTMarketplace.NFTSold(listingId, buyer, seller, PRICE);
+
+        vm.prank(buyer);
+        marketplace.buyNft{value: PRICE}(listingId);
+    }
+
+    function testBuyNftRevertsIfListingNotActive() public {
+        vm.prank(buyer);
+        vm.expectRevert("Listing not active");
+        marketplace.buyNft{value: PRICE}(999);
+    }
+
+    function testBuyNftRevertsIfIncorrectPrice() public {
+        vm.startPrank(seller);
+        nft.setApprovalForAll(address(marketplace), true);
+        uint256 listingId = marketplace.listNft(address(nft), tokenId, PRICE);
+        vm.stopPrank();
+
+        vm.prank(buyer);
+        vm.expectRevert("Incorrect Price");
+        marketplace.buyNft{value: 0.5 ether}(listingId);
+    }
+
+    function testBuyNftRevertsIfBuyOwnNft() public {
+        vm.startPrank(seller);
+        nft.setApprovalForAll(address(marketplace), true);
+        uint256 listingId = marketplace.listNft(address(nft), tokenId, PRICE);
+        vm.stopPrank();
+
+        vm.prank(seller);
+        vm.expectRevert("Cannot buy your own NFT");
+        marketplace.buyNft{value: PRICE}(listingId);
     }
 }
