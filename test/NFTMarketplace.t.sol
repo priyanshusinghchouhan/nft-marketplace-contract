@@ -68,4 +68,24 @@ contract NFTMarketplaceTest is Test {
         marketplace.listNft(address(nft), tokenId, PRICE);
         vm.stopPrank();
     }
+
+    function testListNftRevertsIfPriceZero() public {
+        vm.startPrank(seller);
+        nft.setApprovalForAll(address(marketplace), true);
+
+        vm.expectRevert("Price must be greater than 0");
+        marketplace.listNft(address(nft), tokenId, 0);
+
+        vm.stopPrank();
+    }
+
+    function testListNftRevertsIfInvalidContract() public {
+        vm.startPrank(seller);
+        nft.setApprovalForAll(address(marketplace), true);
+
+        vm.expectRevert("Invalid NFT contract");
+        marketplace.listNft(address(0), tokenId, PRICE);
+
+        vm.stopPrank();
+    }
 }
