@@ -66,10 +66,10 @@ contract NFTMarketplace is ReentrancyGuard {
             "Marketplace not approved"
         );
 
+        uint256 storedId = activeListingByNFT[nftContract][tokenId];
+
         require(
-            activeListingByNFT[nftContract][tokenId] == 0 ||
-                !listings[activeListingByNFT[nftContract][tokenId]].active,
-            "NFT already listed"
+            storedId == 0 || !listings[storedId - 1].active, "NFT already listed" 
         );
 
         uint256 listingId = _listingIdCounter++;
@@ -81,7 +81,7 @@ contract NFTMarketplace is ReentrancyGuard {
             active: true
         });
 
-        activeListingByNFT[nftContract][tokenId] = listingId;
+        activeListingByNFT[nftContract][tokenId] = listingId + 1;
 
         emit NFTListed(listingId, msg.sender, nftContract, tokenId, price);
 
