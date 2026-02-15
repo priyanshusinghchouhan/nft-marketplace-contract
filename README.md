@@ -1,6 +1,5 @@
 # NFT Marketplace Contract (Foundry)
 
-<<<<<<< HEAD
 A minimal **ERC-721 marketplace** smart contract built with **Foundry**.
 
 - **Core actions**: list an NFT, buy a listed NFT, cancel a listing, update listing price
@@ -48,7 +47,7 @@ foundryup
 git submodule update --init --recursive
 forge --version
 ```
-=======
+
 A minimal **ERC-721 marketplace** smart contract built with **Foundry**. Sellers can list NFTs for sale; buyers can purchase them with ETH. The contract runs on chains like **Sepolia** (testnet) and uses OpenZeppelin for safety.
 
 ---
@@ -60,17 +59,14 @@ This repo contains a **smart contract** that acts as a marketplace for ERC-721 N
 ---
 
 ## What you can do
->>>>>>> 90386ad (docs(contract): restructure README for beginners with What is this, Key concepts, Quick start in 3 steps)
 
 - **List an NFT** – As the owner, you approve the marketplace and call `listNft(nftContract, tokenId, price)`.
 - **Buy an NFT** – Send the correct ETH amount and call `buyNft(listingId)`; the NFT is transferred to you and the seller receives the payment.
 - **Cancel a listing** – As the seller, call `cancelListing(listingId)` to remove your listing.
 - **Update listing price** – As the seller, call `updateListingPrice(listingId, newPrice)` to change the price.
 
-<<<<<<< HEAD
 ```bash
 forge build
-=======
 The contract uses **ReentrancyGuard** and has **unit tests** for all main flows and revert cases.
 
 ---
@@ -85,12 +81,10 @@ Install Foundry:
 ```bash
 curl -L https://foundry.paradigm.xyz | bash
 foundryup
->>>>>>> 90386ad (docs(contract): restructure README for beginners with What is this, Key concepts, Quick start in 3 steps)
 ```
 
 ---
 
-<<<<<<< HEAD
 ## Repo layout
 
 ```text
@@ -267,7 +261,6 @@ These are the exact revert strings used by `NFTMarketplace.sol`:
 
 ### Unit tests
 
-=======
 ## Quick start in 3 steps
 
 **1. Clone and set up (including submodules)**
@@ -285,12 +278,10 @@ forge build
 
 **3. Run tests**
 
->>>>>>> 90386ad (docs(contract): restructure README for beginners with What is this, Key concepts, Quick start in 3 steps)
 ```bash
 forge test -vvv
 ```
 
-<<<<<<< HEAD
 ### What’s covered
 
 The suite in `test/NFTMarketplace.t.sol` covers:
@@ -362,7 +353,6 @@ cast send "$NFT_CONTRACT" "approve(address,uint256)" "$MARKETPLACE" "$TOKEN_ID" 
   --rpc-url "$RPC_URL" --private-key "$SELLER_PRIVATE_KEY"
 ```
 
-=======
 If all three work, you’re ready to explore the contract, deploy locally, or deploy to Sepolia.
 
 ---
@@ -548,7 +538,6 @@ cast send "$NFT_CONTRACT" "approve(address,uint256)" "$MARKETPLACE" "$TOKEN_ID" 
   --rpc-url "$RPC_URL" --private-key "$SELLER_PRIVATE_KEY"
 ```
 
->>>>>>> 90386ad (docs(contract): restructure README for beginners with What is this, Key concepts, Quick start in 3 steps)
 Or approve all tokens:
 
 ```bash
@@ -574,7 +563,6 @@ cast send "$MARKETPLACE" "buyNft(uint256)" "$LISTING_ID" \
 
 ---
 
-<<<<<<< HEAD
 ## CI
 
 GitHub Actions workflow `test.yml` runs on push/PR:
@@ -582,7 +570,7 @@ GitHub Actions workflow `test.yml` runs on push/PR:
 - `forge fmt --check`
 - `forge build --sizes`
 - `forge test -vvv`
-=======
+
 ## Contract API
 
 <details>
@@ -679,8 +667,7 @@ These are the exact revert strings used by `NFTMarketplace.sol`:
   - `Listing not active`
   - `Not the seller`
   - `Price must be greater than 0`
->>>>>>> 90386ad (docs(contract): restructure README for beginners with What is this, Key concepts, Quick start in 3 steps)
-
+  
 ---
 
 ## Troubleshooting
@@ -733,8 +720,6 @@ Important considerations:
 
 ---
 
-<<<<<<< HEAD
-=======
 ## CI
 
 GitHub Actions workflow `test.yml` runs on push/PR:
@@ -745,7 +730,6 @@ GitHub Actions workflow `test.yml` runs on push/PR:
 
 ---
 
->>>>>>> 90386ad (docs(contract): restructure README for beginners with What is this, Key concepts, Quick start in 3 steps)
 ## Foundry reference
 
 - Foundry book: `https://book.getfoundry.sh/`
